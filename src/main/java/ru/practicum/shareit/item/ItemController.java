@@ -44,8 +44,8 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestBody ItemDto itemDto, @PathVariable Long itemId
-            , @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDto update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
+                          @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Пришел /PATCH запрос на обновление объекта на {}, с id {}, и id {} пользователя", itemDto, itemId, userId);
         ItemDto item = service.update(itemDto, itemId, userId);
         log.info("Ответ отправлен {}", item);
