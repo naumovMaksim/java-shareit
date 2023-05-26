@@ -8,7 +8,7 @@ import java.util.*;
 @Repository
 public class ItemRepositoryImpl implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
-    private Long id = 1L;
+    private Long id = 0L;
 
     @Override
     public List<Item> findAll() {
@@ -22,7 +22,7 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item create(Item item) {
-        item.setId(id++);
+        item.setId(++id);
         items.put(item.getId(), item);
         return items.get(item.getId());
     }

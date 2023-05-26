@@ -7,11 +7,11 @@ import ru.practicum.shareit.exceptions.DataNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
@@ -49,8 +49,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto create(ItemDto itemDto, Long userId) {
         UserDto user = userService.getById(userId);
-        Item item = toItem(itemDto);
-        item.setOwner(toUser(user));
+        Item item = toItem(itemDto, user);
         return toItemDto(repository.create(item));
     }
 
@@ -74,16 +73,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(Long userId, String text) {
-        String textForSearch = text.toLowerCase();
-        User user = toUser(userService.getById(userId));
-        List<ItemDto> items = new ArrayList<>();
-
-        if (textForSearch.isBlank()) {
-            return items;
+    public List<ItemDto> search(String text) {
+        if (text.isBlank()) {
+            return Collections.emptyList();
         }
+        String textForSearch = text.toLowerCase();
+        List<ItemDto> items = new ArrayList<>();
         for (Item item : repository.findAll()) {
-            if ((!item.getOwner().equals(user)) && item.getName().toLowerCase().contains(textForSearch)
+            if (item.getName().toLowerCase().contains(textForSearch)
                     || item.getDescription().toLowerCase().contains(textForSearch)) {
                 if (item.getAvailable()) {
                     items.add(toItemDto(item));

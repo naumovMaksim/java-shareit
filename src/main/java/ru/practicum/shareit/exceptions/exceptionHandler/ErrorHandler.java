@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
-import ru.practicum.shareit.exceptions.NotUniqException;
+import ru.practicum.shareit.exceptions.DataAlreadyExistException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +14,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleValidationException(final NotUniqException e) {
+    public ErrorResponse handleValidationException(final DataAlreadyExistException e) {
         return new ErrorResponse(String.format("Ошибка: %s", e.getParameter()));
     }
 

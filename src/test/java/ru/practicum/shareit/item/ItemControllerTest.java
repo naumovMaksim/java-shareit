@@ -128,7 +128,7 @@ class ItemControllerTest {
         userController.create(user2);
         controller.create(user2.getId(), toItemDto(itemToSearch));
 
-        assertEquals(List.of(toItemDto(itemToSearch)), controller.search(user.getId(), "Бензопила"));
+        assertEquals(List.of(toItemDto(itemToSearch)), controller.search("Бензопила"));
     }
 
     @Test
@@ -146,6 +146,6 @@ class ItemControllerTest {
         userController.create(user2);
         controller.create(user2.getId(), toItemDto(itemToSearch));
 
-        assertEquals(Collections.emptyList(), controller.search(user.getId(), ""));
+        assertEquals(Collections.emptyList(), controller.search(""));
     }
 }

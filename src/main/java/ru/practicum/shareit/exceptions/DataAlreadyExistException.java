@@ -1,9 +1,9 @@
 package ru.practicum.shareit.exceptions;
 
-public class NotUniqException extends RuntimeException {
+public class DataAlreadyExistException extends RuntimeException {
     private final String parameter;
 
-    public NotUniqException(String parameter) {
+    public DataAlreadyExistException(String parameter) {
         this.parameter = parameter;
     }
 

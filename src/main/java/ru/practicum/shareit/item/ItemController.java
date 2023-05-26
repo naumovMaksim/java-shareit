@@ -9,9 +9,6 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -53,9 +50,9 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestParam String text) {
-        log.info("Пришел запрос на поиск объекта {} от пользователя id {}", userId, text);
-        List<ItemDto> items = service.search(userId, text);
+    public List<ItemDto> search(@RequestParam String text) {
+        log.info("Пришел /GET запрос на поиск объекта {}", text);
+        List<ItemDto> items = service.search(text);
         log.info("Ответ отправлен {}", items);
         return items;
     }
