@@ -50,15 +50,15 @@ public class ItemServiceImpl implements ItemService {
             ItemDto itemDto = toItemDto(item);
             itemDto.setComments(commentRepository.findAllByItemId(itemDto.getId()).stream().map(CommentMapper::toCommentDto)
                     .collect(Collectors.toList()));
-            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc
-                    (itemDto.getId(), LocalDateTime.now()).isEmpty() ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc
-                            (itemDto.getId(), LocalDateTime.now()).get(0)));
+            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc(itemDto.getId(),
+                    LocalDateTime.now()).isEmpty() ? null :
+                    toBookingDto(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc(itemDto.getId(),
+                            LocalDateTime.now()).get(0)));
             if (itemDto.getLastBooking() != null) {
-                itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
-                        (itemDto.getId(), LocalDateTime.now()).isEmpty() ? null :
-                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
-                                (itemDto.getId(), LocalDateTime.now()).get(0)));
+                itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
+                        LocalDateTime.now()).isEmpty() ? null :
+                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
+                                LocalDateTime.now()).get(0)));
             }
             itemDtos.add(itemDto);
         }
@@ -75,15 +75,14 @@ public class ItemServiceImpl implements ItemService {
         itemDto.setComments(commentRepository.findAllByItemId(id).stream().map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList()));
         if (ownerId.equals(item.getOwner().getId())) {
-            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc
-                    (id, ownerId, now).isEmpty() ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc
-                            (id, ownerId, now).get(0)));
+            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc(id,
+                    ownerId, now).isEmpty() ? null :
+                    toBookingDto(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc(id,
+                            ownerId, now).get(0)));
             if (itemDto.getLastBooking() != null) {
-                itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
-                        (itemDto.getId(), LocalDateTime.now()).isEmpty() ? null :
-                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
-                                (id, now).get(0)));
+                itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
+                        LocalDateTime.now()).isEmpty() ? null :
+                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(id, now).get(0)));
             }
         }
         return itemDto;
