@@ -3,6 +3,7 @@ package ru.practicum.shareit.exceptions.exceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.BookingIsNotAvailableException;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
 import ru.practicum.shareit.exceptions.DataAlreadyExistException;
 
@@ -22,6 +23,12 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleDataDataNotFoundException(final DataNotFoundException e) {
         return new ErrorResponse(String.format("Ошибка: %s", e.getParameter()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBookingIsNotAvailableException (final BookingIsNotAvailableException e) {
+        return new ErrorResponse(e.getParameter());
     }
 
     @ExceptionHandler
