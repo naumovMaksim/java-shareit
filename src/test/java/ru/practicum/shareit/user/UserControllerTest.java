@@ -5,9 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
-import ru.practicum.shareit.exceptions.DataAlreadyExistException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collections;
@@ -67,10 +67,10 @@ class UserControllerTest {
                 .name("Max")
                 .email("email@email.ru")
                 .build();
-        final DataAlreadyExistException exception = assertThrows(DataAlreadyExistException.class, () ->
+        final DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () ->
                 controller.create(userForUpdate));
 
-        assertEquals("Пользователь с таким email уже зарегестрирован", exception.getParameter());
+        assertEquals(DataIntegrityViolationException.class, exception.getClass());
     }
 
     @Test

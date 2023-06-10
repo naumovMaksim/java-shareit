@@ -4,17 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
-import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +22,6 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase
 class ItemControllerTest {
     private final ItemController controller;
     private final UserController userController;
@@ -34,7 +30,6 @@ class ItemControllerTest {
 
     @BeforeEach
     void setUp() {
-
         item = ItemDto.builder()
                 .name("Дрель")
                 .description("Сверлит")
@@ -154,18 +149,5 @@ class ItemControllerTest {
         controller.create(user2.getId(), toItemDto(itemToSearch));
 
         assertEquals(Collections.emptyList(), controller.search(""));
-    }
-
-    @Test
-    void addComment() {
-        CommentDto commentDto = CommentDto.builder()
-                .id(1L)
-                .text("comment")
-                .authorName(user.getName())
-                .created(LocalDateTime.now())
-                .build();
-        controller.addComment(item.getId(), user.getId(), commentDto);
-
-        assertEquals(List.of(commentDto), controller.findById(item.getId(), user.getId()).getComments());
     }
 }

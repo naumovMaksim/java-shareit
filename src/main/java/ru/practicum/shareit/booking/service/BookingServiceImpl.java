@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
@@ -37,13 +39,16 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new DataNotFoundException("Предмет не найден"));
         if (userId.equals(item.getOwner().getId())) {
+            log.error("Невозможно создать бронирование своей же ввещи");
             throw new DataNotFoundException("Невозможно создать бронирование своей же ввещи");
         }
         if (!item.getAvailable()) {
+            log.error("Данная вещь недоступна");
             throw new BookingIsNotAvailableException("Данная вещь недоступна");
         }
         Booking booking = toBooking(bookingDto, item, user);
         if (booking.getEnd().isBefore(booking.getStart()) || booking.getStart().equals(booking.getEnd())) {
+            log.error("Дата окончания бронирования не может быть больше даты начала или равна 0");
             throw new BookingIsNotAvailableException("Дата окончания бронирования не может быть больше даты начала или равна 0");
         }
         booking.setStatus(Status.WAITING);
@@ -55,9 +60,11 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new DataNotFoundException("Бронирование не найдено"));
         if (booking.getItem().getOwner().getId() != ownerId) {
+            log.error("Бронирование у пользователя с id {} не найдено", ownerId);
             throw new DataNotFoundException(String.format("Бронирование у пользователя с id %d не найдено", ownerId));
         }
         if (!booking.getStatus().equals(Status.WAITING)) {
+            log.error("Бронирование уже подтверждено или отклонено");
             throw new BookingIsNotAvailableException("Бронирование уже подтверждено или отклонено");
         }
         if (approve) {
@@ -75,6 +82,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new DataNotFoundException("Бронирование не найдено"));
         if (!userId.equals(booking.getBooker().getId()) && !userId.equals(booking.getItem().getOwner().getId())) {
+            log.error("Вы не владелец или автор бронирования");
             throw new DataNotFoundException("Вы не владелец или автор бронирования");
         }
 
@@ -107,6 +115,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings.addAll(bookingRepository.findAllByItemOwnerAndStatusEquals(user, Status.REJECTED, sort));
                 break;
             default:
+                log.error("Unknown state: UNSUPPORTED_STATUS");
                 throw new BookingIsNotAvailableException("Unknown state: UNSUPPORTED_STATUS");
         }
         return bookings;
@@ -138,6 +147,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings.addAll(bookingRepository.findAllByBookerAndStatusEquals(user, Status.REJECTED, sort));
                 break;
             default:
+                log.error("Unknown state: UNSUPPORTED_STATUS");
                 throw new BookingIsNotAvailableException("Unknown state: UNSUPPORTED_STATUS");
         }
         return bookings;
