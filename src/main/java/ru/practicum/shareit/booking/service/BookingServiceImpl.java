@@ -35,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
     public Booking create(BookingDto bookingDto, Long userId) {
         User user = toUser(userService.getById(userId));
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
-                ()-> new DataNotFoundException ("Предмет не найден"));
+                () -> new DataNotFoundException("Предмет не найден"));
         if (userId.equals(item.getOwner().getId())) {
             throw new DataNotFoundException("Невозможно создать бронирование своей же ввещи");
         }
@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     @Override
     public Booking getById(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(()->
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new DataNotFoundException("Бронирование не найдено"));
         if (!userId.equals(booking.getBooker().getId()) && !userId.equals(booking.getItem().getOwner().getId())) {
             throw new DataNotFoundException("Вы не владелец или автор бронирования");

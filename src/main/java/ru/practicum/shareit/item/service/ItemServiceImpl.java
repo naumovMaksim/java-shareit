@@ -48,17 +48,18 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : items) {
             ItemDto itemDto = toItemDto(item);
-                itemDto.setComments(commentRepository.findAllByItemId(itemDto.getId()).stream().map(CommentMapper::toCommentDto)
-                        .collect(Collectors.toList()));
+            itemDto.setComments(commentRepository.findAllByItemId(itemDto.getId()).stream().map(CommentMapper::toCommentDto)
+                    .collect(Collectors.toList()));
             itemDto.setLastBooking(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc
                     (itemDto.getId(), LocalDateTime.now()).isEmpty() ? null :
                     toBookingDto(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc
                             (itemDto.getId(), LocalDateTime.now()).get(0)));
-
-            itemDto.setNextBooking(itemDto.getLastBooking() == null ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
-                    (itemDto.getId(), LocalDateTime.now()).get(0)));
-
+            if (itemDto.getLastBooking() != null) {
+                itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
+                        (itemDto.getId(), LocalDateTime.now()).isEmpty() ? null :
+                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
+                                (itemDto.getId(), LocalDateTime.now()).get(0)));
+            }
             itemDtos.add(itemDto);
         }
         return itemDtos;
@@ -71,16 +72,19 @@ public class ItemServiceImpl implements ItemService {
         Item item = repository.findById(id).orElseThrow(
                 () -> new DataNotFoundException(String.format("Предмет с id %d не найден", id)));
         ItemDto itemDto = toItemDto(item);
-            itemDto.setComments(commentRepository.findAllByItemId(id).stream().map(CommentMapper::toCommentDto)
-                    .collect(Collectors.toList()));
+        itemDto.setComments(commentRepository.findAllByItemId(id).stream().map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList()));
         if (ownerId.equals(item.getOwner().getId())) {
-            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndStatusEqualsAndEndBeforeOrderByStartAsc
-                    (id, Status.APPROVED, now).isEmpty() ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndStatusEqualsAndEndBeforeOrderByStartAsc
-                            (id, Status.APPROVED, now).get(0)));
-            itemDto.setNextBooking(itemDto.getLastBooking() == null ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndStatusEqualsAndStartAfterOrderByStartAsc
-                            (itemDto.getId(), Status.APPROVED, now).get(0)));
+            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc
+                    (id, ownerId, now).isEmpty() ? null :
+                    toBookingDto(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc
+                            (id, ownerId, now).get(0)));
+            if (itemDto.getLastBooking() != null) {
+                itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
+                        (itemDto.getId(), LocalDateTime.now()).isEmpty() ? null :
+                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc
+                                (id, now).get(0)));
+            }
         }
         return itemDto;
     }
@@ -139,7 +143,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) {
         User user = toUser(userService.getById(userId));
-        Item item = repository.findById(itemId).orElseThrow(()->
+        Item item = repository.findById(itemId).orElseThrow(() ->
                 new DataNotFoundException(String.format("Предмет с id %d не найден", itemId)));
         if (bookingRepository.findAllByBookerIdAndItemIdAndStatusEqualsAndEndIsBefore(userId, itemId, Status.APPROVED,
                 LocalDateTime.now()).isEmpty()) {

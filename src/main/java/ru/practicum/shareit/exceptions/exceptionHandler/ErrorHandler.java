@@ -27,7 +27,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBookingIsNotAvailableException (final BookingIsNotAvailableException e) {
+    public ErrorResponse handleBookingIsNotAvailableException(final BookingIsNotAvailableException e) {
         return new ErrorResponse(e.getParameter());
     }
 

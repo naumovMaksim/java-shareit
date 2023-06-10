@@ -7,8 +7,12 @@ import java.util.List;
 
 public interface BookingService {
     Booking create(BookingDto bookingDto, Long userId);
+
     Booking approve(Long bookingId, Long ownerId, Boolean approve);
+
     Booking getById(Long bookingId, Long userId);
+
     List<Booking> getAllByOwner(Long userId, String state);
+
     List<Booking> getAllByBooker(Long userId, String state);
 }
