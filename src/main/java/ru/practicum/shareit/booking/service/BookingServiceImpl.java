@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
+import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingResponseDto;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public Booking create(BookingDto bookingDto, Long userId) {
+    public BookingResponseDto create(BookingRequestDto bookingDto, Long userId) {
         User user = toUser(userService.getById(userId));
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new DataNotFoundException("Предмет не найден"));
@@ -52,11 +54,12 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingIsNotAvailableException("Дата окончания бронирования не может быть больше даты начала или равна 0");
         }
         booking.setStatus(Status.WAITING);
-        return bookingRepository.save(booking);
+        Booking responseBooking = bookingRepository.save(booking);
+        return toBookingResponseDto(responseBooking);
     }
 
     @Override
-    public Booking approve(Long bookingId, Long ownerId, Boolean approve) {
+    public BookingResponseDto approve(Long bookingId, Long ownerId, Boolean approve) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new DataNotFoundException("Бронирование не найдено"));
         if (booking.getItem().getOwner().getId() != ownerId) {
@@ -72,26 +75,25 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(Status.REJECTED);
         }
-
-        return bookingRepository.save(booking);
+        Booking responseBooking = bookingRepository.save(booking);
+        return toBookingResponseDto(responseBooking);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Booking getById(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
+    public BookingResponseDto getById(Long bookingId, Long userId) {
+        Booking bookings = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new DataNotFoundException("Бронирование не найдено"));
-        if (!userId.equals(booking.getBooker().getId()) && !userId.equals(booking.getItem().getOwner().getId())) {
+        if (!userId.equals(bookings.getBooker().getId()) && !userId.equals(bookings.getItem().getOwner().getId())) {
             log.error("Вы не владелец или автор бронирования");
             throw new DataNotFoundException("Вы не владелец или автор бронирования");
         }
-
-        return booking;
+        return toBookingResponseDto(bookings);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Booking> getAllByOwner(Long userId, String state) {
+    public List<BookingResponseDto> getAllByOwner(Long userId, String state) {
         User user = toUser(userService.getById(userId));
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
@@ -118,12 +120,12 @@ public class BookingServiceImpl implements BookingService {
                 log.error("Unknown state: UNSUPPORTED_STATUS");
                 throw new BookingIsNotAvailableException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return bookings;
+        return toBookingResponseDto(bookings);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Booking> getAllByBooker(Long userId, String state) {
+    public List<BookingResponseDto> getAllByBooker(Long userId, String state) {
         User user = toUser(userService.getById(userId));
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
@@ -150,6 +152,6 @@ public class BookingServiceImpl implements BookingService {
                 log.error("Unknown state: UNSUPPORTED_STATUS");
                 throw new BookingIsNotAvailableException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return bookings;
+        return toBookingResponseDto(bookings);
     }
 }

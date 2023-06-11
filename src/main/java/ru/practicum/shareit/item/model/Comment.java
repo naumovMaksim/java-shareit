@@ -29,6 +29,6 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     private User author;
-    @Column(name = "created")
-    private LocalDateTime created;
+    @Column
+    private LocalDateTime created = LocalDateTime.now();
 }

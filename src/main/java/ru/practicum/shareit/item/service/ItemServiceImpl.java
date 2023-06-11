@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
+import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingShortDto;
 import static ru.practicum.shareit.item.mapper.CommentMapper.toComment;
 import static ru.practicum.shareit.item.mapper.CommentMapper.toCommentDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
@@ -52,12 +52,12 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList()));
             itemDto.setLastBooking(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc(itemDto.getId(),
                     LocalDateTime.now()).isEmpty() ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc(itemDto.getId(),
+                    toBookingShortDto(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc(itemDto.getId(),
                             LocalDateTime.now()).get(0)));
             if (itemDto.getLastBooking() != null) {
                 itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
                         LocalDateTime.now()).isEmpty() ? null :
-                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
+                        toBookingShortDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
                                 LocalDateTime.now()).get(0)));
             }
             itemDtos.add(itemDto);
@@ -77,12 +77,12 @@ public class ItemServiceImpl implements ItemService {
         if (ownerId.equals(item.getOwner().getId())) {
             itemDto.setLastBooking(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc(id,
                     ownerId, now).isEmpty() ? null :
-                    toBookingDto(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc(id,
+                    toBookingShortDto(bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBeforeOrderByEndDesc(id,
                             ownerId, now).get(0)));
             if (itemDto.getLastBooking() != null) {
                 itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(itemDto.getId(),
                         LocalDateTime.now()).isEmpty() ? null :
-                        toBookingDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(id, now).get(0)));
+                        toBookingShortDto(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(id, now).get(0)));
             }
         }
         return itemDto;
