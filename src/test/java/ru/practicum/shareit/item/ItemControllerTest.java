@@ -30,11 +30,11 @@ class ItemControllerTest {
 
     @BeforeEach
     void setUp() {
-
         item = ItemDto.builder()
                 .name("Дрель")
                 .description("Сверлит")
                 .available(true)
+                .comments(Collections.emptyList())
                 .build();
 
         user = User.builder()
@@ -56,14 +56,14 @@ class ItemControllerTest {
     void findById() {
         item.setId(1L);
 
-        assertEquals(item, controller.findById(1L));
+        assertEquals(item, controller.findById(item.getId(), user.getId()));
     }
 
     @Test
     void findByIdWrongId() {
         item.setId(1L);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
-                () -> controller.findById(2L));
+                () -> controller.findById(2L, user.getId()));
 
         assertEquals("Предмет с id 2 не найден", exception.getParameter());
     }
@@ -89,9 +89,11 @@ class ItemControllerTest {
                 .description("Пилит")
                 .available(true)
                 .build();
-        controller.update(toItemDto(updatedItem), 1L, user.getId());
+        ItemDto itemDto = toItemDto(updatedItem);
+        itemDto.setComments(Collections.emptyList());
+        controller.update(itemDto, 1L, user.getId());
 
-        assertEquals(toItemDto(updatedItem), controller.findById(1L));
+        assertEquals(itemDto, controller.findById(1L, user.getId()));
     }
 
     @Test

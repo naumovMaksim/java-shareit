@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
-import ru.practicum.shareit.exceptions.DataAlreadyExistException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
@@ -21,6 +22,7 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getAll() {
         List<UserDto> users = new ArrayList<>();
@@ -30,39 +32,36 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDto getById(Long id) {
-        if (userRepository.findById(id) == null) {
-            log.error("Пользователь с id {} не найден", id);
-            throw new DataNotFoundException(String.format("Пользователь с id %d не найден", id));
-        }
-        return toUserDto(userRepository.findById(id));
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new DataNotFoundException(String.format("Пользователь с id %d не найден", id)));
+        return toUserDto(user);
     }
 
+    @Transactional
     @Override
     public UserDto create(@Valid User user) {
-        throwDataAlreadyExistException(user);
-        User createdUser = userRepository.create(user);
+        User createdUser = userRepository.save(user);
         return toUserDto(createdUser);
     }
 
+    @Transactional
     @Override
     public UserDto update(User user, Long id) {
-        return toUserDto(userRepository.update(user, id));
+        User updatedUser = userRepository.findById(id).orElseThrow(
+                () -> new DataNotFoundException(String.format("Пользователь с id %d не найден", id)));
+        Optional.ofNullable(user.getEmail()).ifPresent(updatedUser::setEmail);
+        Optional.ofNullable(user.getName()).ifPresent(updatedUser::setName);
+
+        return toUserDto(userRepository.save(updatedUser));
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
         getById(id);
-        userRepository.delete(id);
-    }
-
-    private void throwDataAlreadyExistException(User user) {
-        for (User checkUser : userRepository.findAll()) {
-            if (user.getEmail().equals(checkUser.getEmail())) {
-                log.error("Пользователь с таким email уже зарегестрирован");
-                throw new DataAlreadyExistException("Пользователь с таким email уже зарегестрирован");
-            }
-        }
+        userRepository.deleteById(id);
     }
 }
