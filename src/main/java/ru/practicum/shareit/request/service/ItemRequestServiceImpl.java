@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.BadRequestException;
@@ -64,8 +65,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException(String.format("Пользователь c id %d не найден", userId)));
-        List<ItemRequestResponseDto> itemsRequest = itemRequestRepository.findAllByRequesterNotLikeOrderByCreatedAsc(user,
-                        PageRequest.of(from, size))
+        List<ItemRequestResponseDto> itemsRequest = itemRequestRepository.findAll(user.getId(),
+                        PageRequest.of(from / size, size, Sort.by("created").descending()))
                 .stream()
                 .map(ItemRequestMapper::mapToItemRequestResponseDto)
                 .collect(Collectors.toList());

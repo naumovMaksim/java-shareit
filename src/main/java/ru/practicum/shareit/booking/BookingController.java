@@ -8,6 +8,8 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -46,20 +48,24 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                  @RequestParam(defaultValue = "ALL") String state) {
+                                                  @RequestParam(defaultValue = "ALL") String state,
+                                                  @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                  @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Пришел /GET запрос на получение списка всех бронирований для владельца с id {}, и с параметром {}",
                 userId, state);
-        List<BookingResponseDto> bookings = bookingService.getAllByOwner(userId, state);
+        List<BookingResponseDto> bookings = bookingService.getAllByOwner(userId, state, from, size);
         log.info("Ответ отправлен {}", bookings);
         return bookings;
     }
 
     @GetMapping
     public List<BookingResponseDto> getAllByBooker(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                   @RequestParam(defaultValue = "ALL") String state) {
+                                                   @RequestParam(defaultValue = "ALL") String state,
+                                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                   @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Пришел /GET запрос на получение списка всех бронирований для пользователя с id {}, и с параметром {}",
                 userId, state);
-        List<BookingResponseDto> bookings = bookingService.getAllByBooker(userId, state);
+        List<BookingResponseDto> bookings = bookingService.getAllByBooker(userId, state, from, size);
         log.info("Ответ отправлен {}", bookings);
         return bookings;
     }

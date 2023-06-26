@@ -2,19 +2,25 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.BookingIsNotAvailableException;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -40,11 +46,20 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> findAll(Long userId) {
-        List<Item> items = repository.findAllByOwnerIdOrderById(userId);
+    public List<ItemDto> findAll(Long userId, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
+                    " быть меньше нуля а размер страницы должен быть больше нуля");
+        }
+        Pageable pageable = PageRequest.of(
+                from == 0 ? 0 : (from/size),
+                size
+        );
+        List<Item> items = repository.findAllByOwnerIdOrderByIdAsc(userId, pageable).toList();
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : items) {
             ItemDto itemDto = toItemDto(item);
@@ -94,6 +109,11 @@ public class ItemServiceImpl implements ItemService {
         UserDto user = userService.getById(userId);
         Item item = toItem(itemDto);
         item.setOwner(toUser(user));
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new DataNotFoundException(String.format("Запрос с id = %d не найден", itemDto.getRequestId())));
+            item.setRequest(itemRequest);
+        }
         repository.save(item);
         return toItemDto(item);
     }
@@ -121,21 +141,23 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text,  int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
+                    " быть меньше нуля а размер страницы должен быть больше нуля");
+        }
         if (text.isBlank()) {
             return Collections.emptyList();
         }
+        Pageable pageable = PageRequest.of(
+                from == 0 ? 0 : (from/size),
+                size
+        );
         String textForSearch = text.toLowerCase();
-        List<ItemDto> items = new ArrayList<>();
-        for (Item item : repository.findAll()) {
-            if (item.getName().toLowerCase().contains(textForSearch)
-                    || item.getDescription().toLowerCase().contains(textForSearch)) {
-                if (item.getAvailable()) {
-                    items.add(toItemDto(item));
-                }
-            }
-        }
-        return items;
+        return repository.search(textForSearch, pageable)
+                .stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional

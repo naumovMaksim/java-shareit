@@ -8,6 +8,8 @@ import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -35,8 +37,8 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getAll(@RequestParam(defaultValue = "0") int from,
-                                               @RequestParam(defaultValue = "10") int size,
+    public List<ItemRequestResponseDto> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                               @RequestParam(defaultValue = "10") @Positive int size,
                                                @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Пришел /GET запрос на получение списка запросов от пользователя с id {} созданных другим пользователем",
                 userId);

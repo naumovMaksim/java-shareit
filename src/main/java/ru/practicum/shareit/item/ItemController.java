@@ -8,6 +8,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -18,9 +20,11 @@ public class ItemController {
     private final ItemService service;
 
     @GetMapping
-    public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                 @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                 @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Пришел /GET запрос на получение всех объектов пользователя с id {}", userId);
-        List<ItemDto> items = service.findAll(userId);
+        List<ItemDto> items = service.findAll(userId, from, size);
         log.info("Ответ отправлен{}", items);
         return items;
     }
@@ -51,9 +55,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
+    public List<ItemDto> search(@RequestParam String text,
+                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Пришел /GET запрос на поиск объекта {}", text);
-        List<ItemDto> items = service.search(text);
+        List<ItemDto> items = service.search(text, from, size);
         log.info("Ответ отправлен {}", items);
         return items;
     }

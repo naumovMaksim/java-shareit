@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class ItemRequestMapper {
     public static ItemRequest mapToItemRequest(ItemRequestDto itemRequestDto, User user) {
         return ItemRequest.builder()
+                .id(itemRequestDto.getId())
                 .description(itemRequestDto.getDescription())
                 .requester(user)
                 .created(LocalDateTime.now())

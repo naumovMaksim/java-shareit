@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,7 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.BookingIsNotAvailableException;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -93,28 +96,37 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingResponseDto> getAllByOwner(Long userId, String state) {
+    public List<BookingResponseDto> getAllByOwner(Long userId, String state, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
+                    " быть меньше нуля а размер страницы должен быть больше нуля");
+        }
+        Pageable pageable = PageRequest.of(
+                from == 0 ? 0 : (from/size),
+                size,
+                sort
+        );
         User user = toUser(userService.getById(userId));
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
             case "ALL":
-                bookings.addAll(bookingRepository.findAllByItemOwner(user, sort));
+                bookings.addAll(bookingRepository.findAllByItemOwner(user, pageable));
                 break;
             case "CURRENT":
                 bookings.addAll(bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfter(user,
-                        LocalDateTime.now(), LocalDateTime.now(), sort));
+                        LocalDateTime.now(), LocalDateTime.now(), pageable));
                 break;
             case "PAST":
-                bookings.addAll(bookingRepository.findAllByItemOwnerAndEndBefore(user, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByItemOwnerAndEndBefore(user, LocalDateTime.now(), pageable));
                 break;
             case "FUTURE":
-                bookings.addAll(bookingRepository.findAllByItemOwnerAndStartAfter(user, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByItemOwnerAndStartAfter(user, LocalDateTime.now(), pageable));
                 break;
             case "WAITING":
-                bookings.addAll(bookingRepository.findAllByItemOwnerAndStatusEquals(user, Status.WAITING, sort));
+                bookings.addAll(bookingRepository.findAllByItemOwnerAndStatusEquals(user, Status.WAITING, pageable));
                 break;
             case "REJECTED":
-                bookings.addAll(bookingRepository.findAllByItemOwnerAndStatusEquals(user, Status.REJECTED, sort));
+                bookings.addAll(bookingRepository.findAllByItemOwnerAndStatusEquals(user, Status.REJECTED, pageable));
                 break;
             default:
                 log.error("Unknown state: UNSUPPORTED_STATUS");
@@ -125,28 +137,41 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingResponseDto> getAllByBooker(Long userId, String state) {
+    public List<BookingResponseDto> getAllByBooker(Long userId, String state, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
+                    " быть меньше нуля а размер страницы должен быть больше нуля");
+        }
+        Pageable pageable = PageRequest.of(
+                from == 0 ? 0 : (from/size),
+                size,
+                sort
+        );
         User user = toUser(userService.getById(userId));
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
             case "ALL":
-                bookings.addAll(bookingRepository.findAllByBooker(user, sort));
+                bookings.addAll(bookingRepository.findAllByBooker(user, pageable).toList());
                 break;
             case "CURRENT":
                 bookings.addAll(bookingRepository.findAllByBookerAndStartBeforeAndEndAfter(user,
-                        LocalDateTime.now(), LocalDateTime.now(), sort));
+                        LocalDateTime.now(), LocalDateTime.now(), pageable).toList());
                 break;
             case "PAST":
-                bookings.addAll(bookingRepository.findAllByBookerAndEndBefore(user, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByBookerAndEndBefore(user, LocalDateTime.now(), pageable)
+                        .toList());
                 break;
             case "FUTURE":
-                bookings.addAll(bookingRepository.findAllByBookerAndStartAfter(user, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByBookerAndStartAfter(user, LocalDateTime.now(), pageable)
+                        .toList());
                 break;
             case "WAITING":
-                bookings.addAll(bookingRepository.findAllByBookerAndStatusEquals(user, Status.WAITING, sort));
+                bookings.addAll(bookingRepository.findAllByBookerAndStatusEquals(user, Status.WAITING, pageable)
+                        .toList());
                 break;
             case "REJECTED":
-                bookings.addAll(bookingRepository.findAllByBookerAndStatusEquals(user, Status.REJECTED, sort));
+                bookings.addAll(bookingRepository.findAllByBookerAndStatusEquals(user, Status.REJECTED, pageable)
+                        .toList());
                 break;
             default:
                 log.error("Unknown state: UNSUPPORTED_STATUS");
