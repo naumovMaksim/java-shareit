@@ -9,7 +9,7 @@ import javax.validation.constraints.*;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class ItemDto {
     private long id;
