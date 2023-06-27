@@ -49,7 +49,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ItemRequestResponseDto getById(@PathVariable Long requestId,
-                                          @RequestHeader("X-Sharer-User-Id") Long userId){
+                                          @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Пришел /GET запрос на получение запроса по id");
         ItemRequestResponseDto itemRequestResponseDto = itemRequestService.getById(requestId, userId);
         log.info("Ответ отправлен {}", itemRequestResponseDto);

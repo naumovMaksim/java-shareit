@@ -13,6 +13,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,7 +45,7 @@ class ItemRepositoryTest {
         user2 = userRepository.save(new User(0, "test2", "test2@mail.ru"));
 
         request1 = itemRequestRepository
-                .save(new ItemRequest(null, "testDescription1",user1, LocalDateTime.now()));
+                .save(new ItemRequest(null, "testDescription1", user1, LocalDateTime.now()));
         request2 = itemRequestRepository
                 .save(new ItemRequest(null, "testDescription2", user1, LocalDateTime.now()));
         request3 = itemRequestRepository

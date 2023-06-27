@@ -16,9 +16,11 @@ import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
+
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -112,7 +114,7 @@ public class BookingControllerMockTest {
 
     @Test
     void findAllByOwnerIdTest() throws Exception {
-        when(bookingService.getAllByOwner(anyLong(), any() ,anyInt(), anyInt()))
+        when(bookingService.getAllByOwner(anyLong(), any(), anyInt(), anyInt()))
                 .thenReturn(List.of(bookingDtoResponse));
         mvc.perform(get("/bookings/owner")
                         .characterEncoding(StandardCharsets.UTF_8)

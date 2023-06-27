@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
     List<ItemRequest> findAllByRequesterIdOrderByCreatedAsc(Long userId);
+
     @Query("select ir from ItemRequest as ir where ir.requester.id not in ?1")
     Page<ItemRequest> findAll(Long userId, Pageable pageable);
 }

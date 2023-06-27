@@ -102,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
         Pageable pageable = PageRequest.of(
-                from == 0 ? 0 : (from/size),
+                from == 0 ? 0 : (from / size),
                 size,
                 sort
         );
@@ -143,7 +143,7 @@ public class BookingServiceImpl implements BookingService {
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
         Pageable pageable = PageRequest.of(
-                from == 0 ? 0 : (from/size),
+                from == 0 ? 0 : (from / size),
                 size,
                 sort
         );

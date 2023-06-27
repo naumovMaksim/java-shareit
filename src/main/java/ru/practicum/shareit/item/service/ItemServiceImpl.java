@@ -56,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
         Pageable pageable = PageRequest.of(
-                from == 0 ? 0 : (from/size),
+                from == 0 ? 0 : (from / size),
                 size
         );
         List<Item> items = repository.findAllByOwnerIdOrderByIdAsc(userId, pageable).toList();
@@ -150,7 +150,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         Pageable pageable = PageRequest.of(
-                from == 0 ? 0 : (from/size),
+                from == 0 ? 0 : (from / size),
                 size
         );
         String textForSearch = text.toLowerCase();

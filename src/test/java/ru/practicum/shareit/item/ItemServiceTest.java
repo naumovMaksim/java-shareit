@@ -175,7 +175,7 @@ class ItemServiceTest {
                 .created(LocalDateTime.now())
                 .build();
         User user = new User(1L, "testName", "test@mail.com");
-        Item item = new Item(1L, "testName", "testDescription", true, user,  null);
+        Item item = new Item(1L, "testName", "testDescription", true, user, null);
         Comment comment = new Comment(1L, "text", item, user, LocalDateTime.now());
         Booking booking = new Booking(null, null, null, null, null, Status.APPROVED);
         Mockito.when(userService.getById(Mockito.anyLong()))

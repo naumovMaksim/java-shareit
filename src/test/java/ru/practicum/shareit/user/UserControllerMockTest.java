@@ -105,10 +105,10 @@ class UserControllerMockTest {
                 .thenReturn(userDto);
 
         mockMvc.perform(patch("/users/1")
-                .content(objectMapper.writeValueAsString(userDto))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", Matchers.is(userDto.getName()), String.class))
                 .andExpect(jsonPath("$.email", Matchers.is(userDto.getEmail()), String.class));
@@ -121,10 +121,10 @@ class UserControllerMockTest {
     void createTest_unCorrectUserEmail() throws Exception {
         user.setEmail("mail");
         mockMvc.perform(post("/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(user))
-                                .characterEncoding(StandardCharsets.UTF_8)
-                                .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest())
                 .andReturn()
@@ -138,10 +138,10 @@ class UserControllerMockTest {
     void createTest_emailAlreadyExist_thenReturnBadRequest() throws Exception {
         Mockito.when(userService.create(any())).thenThrow(BadRequestException.class);
         mockMvc.perform(post("/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(user))
-                                .characterEncoding(StandardCharsets.UTF_8)
-                                .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
     }
