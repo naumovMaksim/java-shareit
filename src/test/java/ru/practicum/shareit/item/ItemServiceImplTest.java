@@ -4,12 +4,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.DataNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -23,10 +27,11 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-class ItemServiceTest {
+class ItemServiceImplTest {
 
     ItemService itemService;
     ItemRepository itemRepository;
@@ -199,6 +204,61 @@ class ItemServiceTest {
         Assertions.assertNotNull(foundComment);
         Assertions.assertEquals(commentInfoDto.getText(), foundComment.getText());
         Assertions.assertEquals(commentInfoDto.getAuthorName(), foundComment.getAuthorName());
+    }
+
+    @Test
+    void findAll() {
+        User user = new User(1L, "testName", "test@mail.com");
+        Item item = new Item(1L, "testName", "testDescription", true, user, null);
+        Item item2 = new Item(2L, "testName2", "testDescription2", true, user, null);
+
+        Mockito.when(userService.getById(Mockito.anyLong()))
+                .thenReturn(UserMapper.toUserDto(user));
+
+        Mockito.when(itemRepository.save(Mockito.any(Item.class)))
+                .thenReturn(item);
+
+        Mockito.when(itemRepository.findAllByOwnerIdOrderByIdAsc(Mockito.anyLong(), Mockito.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(item, item2)));
+
+        Mockito.when(itemService.findAll(Mockito.anyLong(), Mockito.anyInt(), 10))
+                .thenReturn(List.of(ItemMapper.toItemDto(item), ItemMapper.toItemDto(item2)));
+
+        ItemDto itemDto = itemService.create(ItemMapper.toItemDto(item), user.getId());
+        itemDto.setComments(Collections.emptyList());
+        ItemDto itemDto2 = itemService.create(ItemMapper.toItemDto(item2), user.getId());
+        itemDto2.setComments(Collections.emptyList());
+
+        Assertions.assertEquals(List.of(itemDto, itemDto2), itemService.findAll(user.getId(), 0, 10));
+    }
+
+    @Test
+    void findAllWithBadRequestException() {
+        User user = new User(1L, "testName", "test@mail.com");
+        Item item = new Item(1L, "testName", "testDescription", true, user, null);
+        Item item2 = new Item(2L, "testName2", "testDescription2", true, user, null);
+
+        Mockito.when(userService.getById(Mockito.anyLong()))
+                .thenReturn(UserMapper.toUserDto(user));
+
+        Mockito.when(itemRepository.save(Mockito.any(Item.class)))
+                .thenReturn(item);
+
+        Mockito.when(itemRepository.findAllByOwnerIdOrderByIdAsc(Mockito.anyLong(), Mockito.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(item, item2)));
+
+        Mockito.when(itemService.findAll(Mockito.anyLong(), Mockito.anyInt(), 10))
+                .thenThrow(BadRequestException.class);
+
+        ItemDto itemDto = itemService.create(ItemMapper.toItemDto(item), user.getId());
+        itemDto.setComments(Collections.emptyList());
+        ItemDto itemDto2 = itemService.create(ItemMapper.toItemDto(item2), user.getId());
+        itemDto2.setComments(Collections.emptyList());
+
+        Exception exception = Assertions.assertThrows(BadRequestException.class,
+                () -> itemService.findAll(1L, 0, 0));
+
+        Assertions.assertNull(exception.getMessage());
     }
 }
 
