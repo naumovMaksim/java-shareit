@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -255,10 +257,95 @@ class ItemServiceImplTest {
         ItemDto itemDto2 = itemService.create(ItemMapper.toItemDto(item2), user.getId());
         itemDto2.setComments(Collections.emptyList());
 
-        Exception exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> itemService.findAll(1L, 0, 0));
 
-        Assertions.assertNull(exception.getMessage());
+        Assertions.assertNotNull(exception.getParameter());
+    }
+
+    @Test
+    void findAllTestWithLastAndNextBooking() {
+        User user = new User(1L, "testName", "test@mail.com");
+        User user2 = new User(2L, "testName2", "test@mail.com2");
+        Item item = new Item(1L, "testName", "testDescription", true, user, null);
+        BookingShortDto bookingShortDtoLast = BookingShortDto.builder()
+                .bookerId(user2.getId())
+                .itemId(item.getId())
+                .start(LocalDateTime.of(2023, 6, 28, 18, 0))
+                .end(LocalDateTime.of(2023, 6, 28, 19, 0))
+                .build();
+        BookingShortDto bookingShortDtoNext = BookingShortDto.builder()
+                .bookerId(user2.getId())
+                .itemId(item.getId())
+                .start(LocalDateTime.of(2023, 6, 29, 18, 0))
+                .end(LocalDateTime.of(2023, 6, 29, 19, 0))
+                .build();
+        ItemDto itemDto = ItemMapper.toItemDto(item);
+        itemDto.setLastBooking(bookingShortDtoLast);
+        itemDto.setNextBooking(bookingShortDtoNext);
+        itemDto.setComments(Collections.emptyList());
+
+        Mockito.when(itemRepository.findAllByOwnerIdOrderByIdAsc(Mockito.anyLong(), Mockito.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(ItemMapper.toItem(itemDto))));
+
+        Mockito.when(commentRepository.findAllByItemId(Mockito.anyLong()))
+                .thenReturn(Collections.emptyList());
+
+        Mockito.when(bookingRepository.findAllByItemIdAndEndBeforeOrderByStartAsc(Mockito.anyLong(), Mockito.any(LocalDateTime.class)))
+                .thenReturn(List.of(BookingMapper.toBooking(bookingShortDtoLast, item, user2)));
+
+        Mockito.when(bookingRepository.findAllByItemIdAndStartAfterOrderByStartAsc(Mockito.anyLong(), Mockito.any(LocalDateTime.class)))
+                .thenReturn(List.of(BookingMapper.toBooking(bookingShortDtoNext, item, user2)));
+
+        List<ItemDto> itemDtos = itemService.findAll(user.getId(), 0, 10);
+
+        Assertions.assertEquals(itemDto, itemDtos.get(0));
+    }
+
+    @Test
+    void updateWithDataNotFoundExceptionNotUserItem() {
+        User user = new User(1L, "testName", "test@mail.com");
+        User user2 = new User(2L, "testName2", "test@mail.com2");
+        Item item = new Item(1L, "testName", "testDescription", true, user, null);
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("test")
+                .description("test")
+                .available(true)
+                .build();
+
+        Mockito.when(userService.getById(Mockito.anyLong()))
+                .thenReturn(UserMapper.toUserDto(user2));
+
+        Mockito.when(itemRepository.findById(Mockito.anyLong()))
+                .thenReturn(Optional.of(item));
+
+        DataNotFoundException exception = Assertions.assertThrows(DataNotFoundException.class,
+                () -> itemService.update(itemDto, itemDto.getId(), user2.getId()));
+
+        Assertions.assertNotNull(exception.getParameter());
+    }
+
+    @Test
+    void updateWithDataNotFoundException() {
+        User user2 = new User(2L, "testName2", "test@mail.com2");
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("test")
+                .description("test")
+                .available(true)
+                .build();
+
+        Mockito.when(userService.getById(Mockito.anyLong()))
+                .thenReturn(UserMapper.toUserDto(user2));
+
+        Mockito.when(itemRepository.findById(Mockito.anyLong()))
+                .thenReturn(Optional.empty());
+
+        DataNotFoundException exception = Assertions.assertThrows(DataNotFoundException.class,
+                () -> itemService.update(itemDto, itemDto.getId(), user2.getId()));
+
+        Assertions.assertNotNull(exception.getParameter());
     }
 }
 
