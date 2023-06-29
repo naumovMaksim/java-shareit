@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.itemRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,8 +8,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
-import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.itemRequest.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.itemRequest.service.ItemRequestService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

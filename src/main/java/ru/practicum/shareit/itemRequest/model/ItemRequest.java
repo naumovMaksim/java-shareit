@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.model;
+package ru.practicum.shareit.itemRequest.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "REQUESTS")
+@Table(name = "ITEM_REQUESTS")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

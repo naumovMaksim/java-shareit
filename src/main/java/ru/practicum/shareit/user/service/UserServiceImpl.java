@@ -25,7 +25,6 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getAll() {
         List<UserDto> users = new ArrayList<>();
@@ -35,7 +34,6 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
-    @Transactional(readOnly = true)
     @Override
     public UserDto getById(Long id) {
         User user = userRepository.findById(id).orElseThrow(

@@ -1,15 +1,13 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.itemRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
-import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
+import ru.practicum.shareit.itemRequest.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.itemRequest.service.ItemRequestService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -37,8 +35,8 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                               @RequestParam(defaultValue = "10") @Positive int size,
+    public List<ItemRequestResponseDto> getAll(@RequestParam(defaultValue = "0") int from,
+                                               @RequestParam(defaultValue = "10") int size,
                                                @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Пришел /GET запрос на получение списка запросов от пользователя с id {} созданных другим пользователем",
                 userId);

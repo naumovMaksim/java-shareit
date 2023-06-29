@@ -19,8 +19,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.itemRequest.model.ItemRequest;
+import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -48,14 +48,13 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
 
-    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> findAll(Long userId, int from, int size) {
         if (from < 0 || size <= 0) {
             throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
-        Pageable pageable = PageRequest.of(
+        final Pageable pageable = PageRequest.of(
                 from == 0 ? 0 : (from / size),
                 size
         );
@@ -80,7 +79,6 @@ public class ItemServiceImpl implements ItemService {
         return itemDtos;
     }
 
-    @Transactional(readOnly = true)
     @Override
     public ItemDto findById(Long id, Long ownerId) {
         final LocalDateTime now = LocalDateTime.now();
@@ -139,17 +137,16 @@ public class ItemServiceImpl implements ItemService {
         return toItemDto(repository.save(item));
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> search(String text,  int from, int size) {
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
         if (from < 0 || size <= 0) {
             throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
-        if (text.isBlank()) {
-            return Collections.emptyList();
-        }
-        Pageable pageable = PageRequest.of(
+        final Pageable pageable = PageRequest.of(
                 from == 0 ? 0 : (from / size),
                 size
         );

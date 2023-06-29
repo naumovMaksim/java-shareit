@@ -82,7 +82,6 @@ public class BookingServiceImpl implements BookingService {
         return toBookingResponseDto(responseBooking);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public BookingResponseDto getById(Long bookingId, Long userId) {
         Booking bookings = bookingRepository.findById(bookingId).orElseThrow(() ->
@@ -94,14 +93,13 @@ public class BookingServiceImpl implements BookingService {
         return toBookingResponseDto(bookings);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseDto> getAllByOwner(Long userId, String state, int from, int size) {
         if (from < 0 || size <= 0) {
             throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
-        Pageable pageable = PageRequest.of(
+        final Pageable pageable = PageRequest.of(
                 from == 0 ? 0 : (from / size),
                 size,
                 sort
@@ -135,14 +133,13 @@ public class BookingServiceImpl implements BookingService {
         return toBookingResponseDto(bookings);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseDto> getAllByBooker(Long userId, String state, int from, int size) {
         if (from < 0 || size <= 0) {
             throw new BadRequestException("Не правильно переданы параметры поиска, индекс первого элемента не может" +
                     " быть меньше нуля а размер страницы должен быть больше нуля");
         }
-        Pageable pageable = PageRequest.of(
+        final Pageable pageable = PageRequest.of(
                 from == 0 ? 0 : (from / size),
                 size,
                 sort
