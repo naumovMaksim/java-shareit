@@ -18,9 +18,11 @@ public class ItemController {
     private final ItemService service;
 
     @GetMapping
-    public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                 @RequestParam(defaultValue = "0") int from,
+                                 @RequestParam(defaultValue = "10") int size) {
         log.info("Пришел /GET запрос на получение всех объектов пользователя с id {}", userId);
-        List<ItemDto> items = service.findAll(userId);
+        List<ItemDto> items = service.findAll(userId, from, size);
         log.info("Ответ отправлен{}", items);
         return items;
     }
@@ -51,9 +53,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
+    public List<ItemDto> search(@RequestParam String text,
+                                @RequestParam(defaultValue = "0") int from,
+                                @RequestParam(defaultValue = "10") int size) {
         log.info("Пришел /GET запрос на поиск объекта {}", text);
-        List<ItemDto> items = service.search(text);
+        List<ItemDto> items = service.search(text, from, size);
         log.info("Ответ отправлен {}", items);
         return items;
     }

@@ -1,9 +1,9 @@
 package ru.practicum.shareit.exceptions;
 
-public class DataAlreadyExistException extends RuntimeException {
+public class BadRequestException extends RuntimeException {
     private final String parameter;
 
-    public DataAlreadyExistException(String parameter) {
+    public BadRequestException(String parameter) {
         this.parameter = parameter;
     }
 

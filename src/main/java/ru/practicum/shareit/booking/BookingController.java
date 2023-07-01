@@ -46,20 +46,24 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                  @RequestParam(defaultValue = "ALL") String state) {
+                                                  @RequestParam(defaultValue = "ALL") String state,
+                                                  @RequestParam(defaultValue = "0") int from,
+                                                  @RequestParam(defaultValue = "10") int size) {
         log.info("Пришел /GET запрос на получение списка всех бронирований для владельца с id {}, и с параметром {}",
                 userId, state);
-        List<BookingResponseDto> bookings = bookingService.getAllByOwner(userId, state);
+        List<BookingResponseDto> bookings = bookingService.getAllByOwner(userId, state, from, size);
         log.info("Ответ отправлен {}", bookings);
         return bookings;
     }
 
     @GetMapping
     public List<BookingResponseDto> getAllByBooker(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                   @RequestParam(defaultValue = "ALL") String state) {
+                                                   @RequestParam(defaultValue = "ALL") String state,
+                                                   @RequestParam(defaultValue = "0") int from,
+                                                   @RequestParam(defaultValue = "10") int size) {
         log.info("Пришел /GET запрос на получение списка всех бронирований для пользователя с id {}, и с параметром {}",
                 userId, state);
-        List<BookingResponseDto> bookings = bookingService.getAllByBooker(userId, state);
+        List<BookingResponseDto> bookings = bookingService.getAllByBooker(userId, state, from, size);
         log.info("Ответ отправлен {}", bookings);
         return bookings;
     }
