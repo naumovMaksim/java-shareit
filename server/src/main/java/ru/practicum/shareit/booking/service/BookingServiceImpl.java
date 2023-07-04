@@ -126,9 +126,6 @@ public class BookingServiceImpl implements BookingService {
             case "REJECTED":
                 bookings.addAll(bookingRepository.findAllByItemOwnerAndStatusEquals(user, Status.REJECTED, pageable));
                 break;
-            default:
-                log.error("Unknown state: UNSUPPORTED_STATUS");
-                throw new BookingIsNotAvailableException("Unknown state: UNSUPPORTED_STATUS");
         }
         return toBookingResponseDto(bookings);
     }
@@ -170,9 +167,6 @@ public class BookingServiceImpl implements BookingService {
                 bookings.addAll(bookingRepository.findAllByBookerAndStatusEquals(user, Status.REJECTED, pageable)
                         .toList());
                 break;
-            default:
-                log.error("Unknown state: UNSUPPORTED_STATUS");
-                throw new BookingIsNotAvailableException("Unknown state: UNSUPPORTED_STATUS");
         }
         return toBookingResponseDto(bookings);
     }

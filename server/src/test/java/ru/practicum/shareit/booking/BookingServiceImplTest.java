@@ -114,17 +114,4 @@ class BookingServiceImplTest {
 
         Assertions.assertNotNull(exception.getParameter());
     }
-
-    @Test
-    void getAllByOwnerWithBookingIsNotAvailableException() {
-        User user = new User(1L, "testName", "test@mail.com");
-
-        Mockito.when(userService.getById(Mockito.anyLong()))
-                .thenReturn(UserMapper.toUserDto(user));
-
-        BookingIsNotAvailableException exception = Assertions.assertThrows(BookingIsNotAvailableException.class,
-                () -> bookingService.getAllByOwner(user.getId(), "t", 0, 10));
-
-        Assertions.assertNotNull(exception.getParameter());
-    }
 }
